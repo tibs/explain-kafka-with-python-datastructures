@@ -4,6 +4,10 @@ Explaiining Apache Kafka® using Python concepts
 
 ...or, 'Writing a "toy" Kafka'
 
+(Do I actually have any intent of *writing* such a thing, or should this just
+talk through it? Having code may make it easier to talk about, and will make
+it easier to spot mistakes.)
+
 
 Reference *the paper*
 
@@ -104,6 +108,19 @@ In Python, we could make a subclass of Deque, add the new "offset" value, and
 either override the method backing ``[]``, or provide a new method that we use
 instead.
 
+Or (mad idea) we could use a dictionary. Or, more specifically, a new class
+with a dictionary ABC.  The access syntax is the same: ``[n]``. We'd need to
+record the "last" index, to enable us to do ``[-1]``. We'd also need to record
+the "earliest" index, to allow for removing the first N events. But actually
+access would be simpler (C will always be able to use the correct index
+directly, as they are now dictionary keys), and we get interesting semantics
+if C tries to access an event that has "gone away" - either a index exception,
+or (perhaps) ``None``.
+
+While a deque or a dictionary might be the best choice here, using a new class
+is definitely the way to go - it would also allow us to *change* the
+implementation without P or C needing to know.
+
 -----
 
 Multiple topics
@@ -115,3 +132,7 @@ Compaction
 Threading/multiple processes/etc.
 
 What else?
+
+Schemas using Pydantic?
+
+Flink???
