@@ -13,27 +13,27 @@ Reference
 
 * `The Log: What every software engineer should know about real-time data's unifying abstraction`_
   which introduces the idea that tables and events are a dual, and leads to
-  the ideas behind Kafka
+  Apache Kafka® as an implementation of that idea.
+
 * Olena Kutsenko's blog post `Apache Kafka® simply explained`_
+
+  Maybe reference her high points (from the start) of what Kafka is, and note
+  which one's we aren't going to address:
+
+  * **an event streaming platform** - well, we'll sort of provide a toy
+    version
+  * **a platform to handle transportation of messages** - ditto
+  * **distributed** - nope
+  * **scalable** - oh my, no
+  * **community** and **wide ecosystem** - of course not
 
 .. _`The Log: What every software engineer should know about real-time data's unifying abstraction`:
   https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying
 .. _`Apache Kafka® simply explained`: https://aiven.io/blog/kafka-simply-explained
 
-Apache Kafka® is an implementation of that idea.
-
 The proposal here is to explain the ideas of Kafka using Python datatypes.
 This is *not* an implementation of Kafka - it is purely a "toy" to illustrate
 the ideas, and there will be approximations and things left out.
-
-Let's start with a simple Deque.
-
-The producer, P, adds items to the start/left of the deque. The consumer, C, reads
-them. In line with Kafka and the paper, we will term our items "events".
-
-1. The events on the list are ordered, as P placed them onto the list
-2. C does not *remove* events from the list - they stay there.
-3. So C has an idea of where it last read from
 
 Mechanism
 =========
@@ -48,6 +48,15 @@ introduce the complexity of a Textual GUI.
 
 One P, one C
 ============
+
+Let's start with a simple Deque.
+
+The producer, P, adds items to the start/left of the deque. The consumer, C, reads
+them. In line with Kafka and the paper, we will term our items "events".
+
+1. The events on the list are ordered, as P placed them onto the list
+2. C does not *remove* events from the list - they stay there.
+3. So C has an idea of where it last read from
 
 Start with a Deque
 ------------------
@@ -89,23 +98,25 @@ events.
 This means that C won't be able to use its index directly any more - the
 actual index ``[0]`` won't be the "theoretical" index ``[0]``.
 
+  This "theoretical" index is the **offset** of the event, in Kafka terms.
+
 So wrap the deque in a class. Let's call it ``Kafkaesque``. Create the deque with::
 
   collections.deque(maxlen=MAXLEN)
 
 and provide some methods:
 
-* ``get(n)`` to retrieve the entry at "theoretical" index ```n``. Treats
-  negative ``n`` as we'd expect (so ``-1`` means the last entry). Raises an
-  exception if ``n`` no longer exists in the deque.
+* ``get(n)`` to retrieve the entry at offset ```n``. Treats negative ``n`` as
+  we'd expect (so ``-1`` means the last entry). Raises an exception if ``n``
+  no longer exists in the deque.
 
 * ``earliest()`` gets the earliest entry (the entry with *actual* index
-  ``[0]``), and returns a tuple of the entry ("theoretical") index and its
-  value: ``(index, value)``
+  ``[0]``), and returns a tuple of the entry offset and its value: ``(offset,
+  value)``
 
 * ``latest()`` gets the latest/newest entry (the entry with *actual* index
-  ``[-1]``), and returns a tuple of the entry ("theoretical") index and its
-  value: ``(index, value)``
+  ``[-1]``), and returns a tuple of the entry offset and its value: ``(offset,
+  value)``
 
 We might as well also have ``put(value)`` for adding a value to the deque, so
 that we don't need to access it directly.
@@ -121,6 +132,9 @@ Topics
 
 With real Kafka, events can be sent to *topics* (add a brief discussion of why
 this is useful <smile>).
+
+  Topics allow us to organise events by what sort of event they are, what they
+  represent or how they are to be managed.
 
 We can do this ourselves by having an array of our deque-wrapper class (which
 we should now rename as ``Topic``, and have a new top-level ``Kafkaesque``
@@ -193,6 +207,9 @@ Partitions
 
 Explain why partitions.
 
+* A producer writes to a set of partitions (that constitute a topic or topics)
+* A consumer reads from a set of partitions
+
 In our terms, this is just pushing the actual deques down another level (so we
 have one deque per partition) and adding in more management functionality to
 make them work appropriately.
@@ -258,6 +275,10 @@ talk to no good purpose.
 
 However, they should be mentioned, so I do need an understanding here of how
 we *would* simulate them.
+
+  Brokers allow replication of partitions across physical devices (???). Each
+  broker will contain multiple partitions, and each partition will be on
+  multiple brokers. So if a device goes down, the data is not lost.
 
 **TBD: Work out how we'd do "brokers" if we did want to.**
 
