@@ -121,11 +121,10 @@ and provide some methods:
 We might as well also have ``put(value)`` for adding a value to the deque, so
 that we don't need to access it directly.
 
-.. note:: This means old events are just discarded. Does *actual* Kafka have a
-          mechanism to automatically push old events to backing/cold storage?
-          I think worrying about that is beyond the scope of this discussion -
-          or if not, something we would introduce in the "optional" stuff at
-          the end.
+  **Note:** This means old events are just discarded. Does *actual* Kafka have
+  a mechanism to automatically push old events to backing/cold storage? I
+  think worrying about that is beyond the scope of this discussion - or if
+  not, something we would introduce in the "optional" stuff at the end.
 
 Topics
 ------
@@ -144,13 +143,13 @@ The ``Topic`` access methods then have corresponding access methods in the top
 level class, which take the topic index as their first argument. The producer
 and consumer have to specify the topic they want to interact with.
 
-.. note:: The producer specifies the topic for each ``put``, so a single
-          producer can write to multiple topics.
+  **Note:** The producer specifies the topic for each ``put``, so a single
+  producer can write to multiple topics.
 
-          The consumer decides on the topic when it is created, so a single
-          consumer will not read from multiple topics.
+  The consumer decides on the topic when it is created, so a single
+  consumer will not read from multiple topics.
 
-          **(I haven't got that wrong, have I?)**
+  **(I haven't got that wrong, have I?)**
 
 Topics and keys
 ---------------
