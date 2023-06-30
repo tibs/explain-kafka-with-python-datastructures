@@ -46,6 +46,78 @@ doing) and consumers the same. This would actually *look* more like actual
 Kafka. It's also more flexible for playing with the parts, and doesn't
 introduce the complexity of a Textual GUI.
 
+  **Note:** Why yes, if the "mock kafka" is in a FastAPI application, we will
+  be storing a class instance as a global, so it persists. I hope it's obvious
+  we'll only want one worker.
+
+  And any audience member who asks if we shouldn't be using Redis to persist
+  the data instead will deserve brownie points!
+
+Notes
+-----
+
+* Let's not forget https://www.gentlydownthe.stream/
+
+* FastAPI for the win
+
+* Use httpx instead of requests (it's better maintained, more modern, supports
+  asyncio)
+
+  https://www.python-httpx.org/
+
+* When retrieving data, look at SSE. Do the normal POST to send stuff, but do
+  a GET that specifies an offset and returns a stream from that point. This is
+  now standard HTTP 2
+
+  (This is Ben nerd-sniping me with a way to (a) learn interesting stuff, (b)
+  show off interesting stuff, and (c) make the actual "toy" just *that bit* better.)
+
+  FastAPI and SSE:
+
+  * 2022 https://devdojo.com/bobbyiliev/how-to-use-server-sent-events-sse-with-fastapi
+  * 2020 https://sairamkrish.medium.com/handling-server-send-events-with-python-fastapi-e578f3929af1
+  * The starlette (https://github.com/encode/starlette) TestClient uses httpx
+  * 2020 https://sysid.github.io/server-sent-events/
+
+  HTTPX and SSE:
+
+  * https://github.com/florimondmanca/httpx-sse
+  * https://github.com/encode/httpx/issues/1278 has comments, and ends up
+    referrring to httpx-sse. The HTTPX
+    third part packages page (https://www.python-httpx.org/third_party_packages/)
+    also now refers to it.
+
+  Part 9
+  (https://christophergs.com/tutorials/ultimate-fastapi-tutorial-pt-9-asynchronous-performance-basics/)
+  of "The Ultimate FastAPI Tutorial" shows using httpx in the context of (the
+  client for) a FastAPI service.
+
+  **Using SSE** should let me support the ``async for <thing>: get next
+  thing`` sort of loop in the Consumer. This may only be for the DevCenter
+  variant of the text - for the talk I hadn't gone as far as thinking about
+  writing the Consumer (or, indeed, Producer) classe, but only implementing
+  the backend, the ``Kafkaesque`` FastAPI server itself. However, providing
+  basic Producer and Consumer classes would be very nice, and actually
+  probably isn't much work.
+
+* *Do* write "stale messages" to a file, as this is an important principle of
+  how kafka is used - and any Python programmer should understand how to get
+  "old" messages from a file. (hmm - or perhaps even a local sqlite db???)
+
+* At the end, if there's a DevCenter piece, implement one of the
+  Fish&Chips&Kafka examples using the "toy" service - and that's when having
+  simple Consumer and Producer classes would be especially useful.
+
+  ...the more I think of it, the more that's probably a thing to do right from
+  the start, so the user of the "toy" never has to worry about network
+  POST/GET minutiae.
+
+Note on naming: PyPi already lists https://pypi.org/project/kafkaesque/ as
+"a flask style kafka consumer", an "extension of the KafkaConsumer from the
+kafka-python package". The source code is at https://github.com/sankalpjonn/kafkaesque
+and it was last touched 5 years ago.
+
+
 One P, one C
 ============
 
